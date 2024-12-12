@@ -10,6 +10,8 @@ let throttleMiner = 0; // Throttle value in percentage (0 = max utilization)
 let workers = [], ws, totalHashes = 0, connected = false, job = null, reconnectAttempts = 0;
 const maxReconnectAttempts = 10;
 
+
+
 const wasmSupported = (() => {
   try {
     if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function") {
